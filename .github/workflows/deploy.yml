@@ -1,0 +1,46 @@
+name: Deploy slides to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  # lets you re-run a deploy from the Actions tab without pushing
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# let a running deploy finish rather than cancelling it half-published
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+
+      - run: npm ci
+
+      # --base must match the Pages sub-path, or every asset 404s.
+      # For https://<user>.github.io/<repo>/ that is /<repo>/.
+      - run: npm run build -- --base /${{ github.event.repository.name }}/
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+      - id: deployment
+        uses: actions/deploy-pages@v4
