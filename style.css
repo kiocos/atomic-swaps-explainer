@@ -1,0 +1,112 @@
+/* Boltz palette — boltz-web-app/src/style/theme.scss, boltz-theme="default".
+   Component-level styling lives in UnoCSS utilities and shortcuts (uno.config.ts);
+   this file only covers the slide chrome that utilities cannot reach. */
+:root {
+  --b-bg: #09141f;
+  --b-surface: #12253a;
+  --b-gold: #e8cb2b;
+  --b-cyan: #4fadc2;
+  --b-text: #d7dee4;
+  --b-muted: #8a97a3;
+}
+
+.slidev-layout {
+  /* containing block for absolutely-positioned slide furniture */
+  position: relative;
+  background:
+    radial-gradient(1100px 640px at 84% -14%, rgba(232, 203, 43, 0.07), transparent 62%),
+    radial-gradient(880px 560px at -10% 110%, rgba(83, 49, 128, 0.24), transparent 60%),
+    var(--b-bg);
+  color: var(--b-text);
+  padding: 2.6rem 3.4rem;
+}
+
+/* Headings ---------------------------------------------------------------- */
+.slidev-layout h1 {
+  color: #fff;
+  font-weight: 800;
+  font-size: 2.45rem;
+  line-height: 1.1;
+  letter-spacing: -0.022em;
+  margin-bottom: 0;
+}
+.slidev-layout h2 { color: #fff; font-weight: 700; }
+.slidev-layout p { color: var(--b-muted); margin: 0; }
+
+/* Keep titles clear of the Boltz mark in the top-right (see global-top.vue),
+   so a long one wraps early instead of running underneath it. */
+.slidev-layout:not(.cover):not(.section):not(.center) h1 { padding-right: 7rem; }
+
+/* A thin gold rule under every content-slide title. */
+.slidev-layout:not(.cover):not(.section):not(.center) h1::after {
+  content: '';
+  display: block;
+  width: 2.6rem;
+  height: 2px;
+  margin-top: 0.7rem;
+  background: linear-gradient(90deg, var(--b-gold), transparent);
+}
+
+/* Cover + section dividers ------------------------------------------------ */
+.slidev-layout.cover, .slidev-layout.section { justify-content: center; }
+.slidev-layout.cover h1 {
+  font-size: 4.2rem;
+  background: linear-gradient(18deg, #eac806 8%, #f0d84e 44%, #8ec0f2 98%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.slidev-layout.section h1 { font-size: 3rem; color: var(--b-gold); }
+.slidev-layout.section h1::after { display: none; }
+
+/* Code + tables ----------------------------------------------------------- */
+.slidev-layout code { color: #fee86b; }
+.slidev-layout pre {
+  background: rgba(255, 255, 255, 0.035) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+}
+.slidev-layout table { font-size: 0.85rem; }
+.slidev-layout th {
+  color: var(--b-gold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.72rem;
+}
+
+/* Shedding an element carried over from the previous slide ----------------- */
+/* Slide 5 opens in slide 4's exact final state and then drops the caption
+   between the ledgers. It has to be an animation rather than a v-click or a
+   Vue transition: Slidev keeps every slide mounted from page load and merely
+   hides the inactive ones, so anything keyed to mount fires invisibly during
+   startup. It hides them with `display: none`, which restarts CSS animations —
+   so this replays every time the slide is shown. Opacity only, so the element
+   keeps its box and the ledgers either side of it cannot move. */
+.fade-out-on-reveal { animation: fade-out-on-reveal 0.5s ease 0.35s both; }
+@keyframes fade-out-on-reveal { from { opacity: 1; } to { opacity: 0; } }
+
+/* The sweep inside the phone's viewfinder while it reads the QR. Same reason as
+   the rule above: a CSS animation replays every time the slide is shown, which
+   a Vue transition keyed to mount would not. */
+.scan-sweep > div { animation: scan-sweep 1.6s ease-in-out infinite; }
+@keyframes scan-sweep {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(7.5rem); }
+}
+
+/* A single nudge, for the lockup Alice tries and cannot open. Small on purpose:
+   it should read as the thing refusing, not as a comedy wobble. */
+.shake-once { animation: shake-once .42s cubic-bezier(.36, .07, .19, .97) both; }
+@keyframes shake-once {
+  10%, 90% { transform: translateX(-2px); }
+  20%, 80% { transform: translateX(4px); }
+  30%, 50%, 70% { transform: translateX(-6px); }
+  40%, 60% { transform: translateX(6px); }
+}
+
+/* Opt-in on slides whose listing is long enough to run off the bottom. */
+.compact-code .slidev-code { font-size: 0.76rem; line-height: 1.5; }
+
+/* Slidev chrome ----------------------------------------------------------- */
+.slidev-page { scrollbar-width: none; }
+::selection { background: rgba(232, 203, 43, 0.3); }
