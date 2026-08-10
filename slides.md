@@ -385,320 +385,86 @@ escrow and no third party anywhere in the picture.
 -->
 
 ---
-layout: center
-class: text-center
+clicks: 4
 ---
 
-<div class="mb-5 flex justify-center"><div class="i-ph-question-mark-bold text-6xl text-red" /></div>
-
-# So what stops Alice?
-
-<div class="mt-4 text-xl text-muted">
-  She holds the key. What keeps her from ending up with <span class="text-white">both</span> sides?
-</div>
-
-<!--
-Hold on, though. Look at the position Alice is in.
-
-She picked the preimage. She is the only one who has it, and she chooses when — and whether — to
-use it. Bob has funded a lockup and is now waiting on a decision that is entirely hers.
-
-So ask the obvious question. What actually stops her from ending up with both?
-
-Do not answer it yet. Let the room sit with it — and if someone shouts the answer, that is fine,
-the next slide is the picture of what goes wrong.
-
-One thing to head off if it comes up: she cannot simply claim both lockups. Her own lockup pays out
-to Bob and needs *his* signature, not just the key — we will see that in the actual script shortly.
-The problem is subtler than theft, and worse, because it needs no dishonesty at all. Only patience.
--->
-
----
-clicks: 3
----
-
-<HtlcTitle active="hash" />
+<HtlcTitle active="time" />
 
 <LedgerPair
   left-person="Alice" right-person="Bob"
   left-title="Bitcoin" left-chain="bitcoin" left-beneficiary="Bob"
   right-title="Liquid" right-chain="liquid" right-beneficiary="Alice"
   left-asset="bitcoin" right-asset="liquid" show-assets
-  :left-asset-at="$clicks >= 2 ? 'alice' : 'lockupA'"
-  :right-asset-at="$clicks >= 1 ? 'alice' : 'lockupB'"
-  :key-at="$clicks >= 2 ? 'lockupA' : $clicks >= 1 ? 'lockupB' : 'alice'"
-  :left-state="$clicks >= 2 ? 'open' : 'locked'"
-  :right-state="$clicks >= 1 ? 'open' : 'locked'"
-  :left-note="$clicks >= 2 ? 'Alice took it too' : ''"
-  :right-note="$clicks >= 1 ? 'Alice took it' : ''">
+  :left-asset-at="$clicks >= 3 ? 'alice' : 'lockupA'"
+  :right-asset-at="$clicks >= 4 ? 'bob' : 'lockupB'"
+  :key-at="$clicks >= 3 ? null : 'alice'"
+  :left-state="$clicks >= 3 ? 'refunded' : 'locked'"
+  :right-state="$clicks >= 4 ? 'refunded' : 'locked'"
+  :left-note="$clicks >= 3 ? 'back to Alice' : ''"
+  :right-note="$clicks >= 4 ? 'back to Bob' : ''">
+
+  <!-- Two lines in the same place, cross-faded rather than stacked, so the zone
+       height never changes and the second reads as a consequence of the first.
+       Same device as the closing chips on the honest-claim slide. -->
+  <template #top>
+    <div class="relative h-9 w-full">
+      <div class="absolute inset-x-0 flex justify-center transition-opacity duration-500"
+           :class="$clicks === 1 ? 'opacity-100' : 'opacity-0'">
+        <span class="chip-gold !text-sm !px-4 !py-1.5">
+          <span class="i-ph-clock-countdown-fill" /> each lockup also carries its own deadline
+        </span>
+      </div>
+      <div class="absolute inset-x-0 flex justify-center transition-opacity duration-500"
+           :class="$clicks >= 2 ? 'opacity-100' : 'opacity-0'">
+        <span class="chip-gold !text-sm !px-4 !py-1.5">
+          <span class="i-ph-hourglass-fill" /> nobody claims, and the deadlines pass
+        </span>
+      </div>
+    </div>
+  </template>
 
   <template #middle>
-    <div v-click="2" class="flex flex-col items-center gap-1 text-center text-xs text-red leading-tight">
-      <div class="i-ph-arrows-left-right-bold text-xl" />
-      and straight<br>back for<br>her own
+    <div v-click="1" class="text-center text-xs text-cyan leading-tight">
+      past it, each<br>side can take<br>their own back
     </div>
   </template>
 
   <template #bottom>
-    <div v-click="3" class="pane-red flex items-center gap-4 px-6 py-3">
-      <div class="i-ph-x-circle-fill shrink-0 text-2xl text-red" />
-      <div class="text-lg text-white">Alice has both. Bob has <span class="text-red">nothing</span>.</div>
+    <div v-click="4" class="pane flex items-center gap-4 px-6 py-3">
+      <div class="i-ph-arrow-u-up-left-bold shrink-0 text-2xl text-cyan" />
+      <div class="text-lg text-white">Nobody's money can be <span class="text-cyan">stuck forever</span>.</div>
     </div>
   </template>
 
 </LedgerPair>
 
 <!--
-Here is the version of the answer most people reach for first.
+The H is done. Here is the T, and it answers a question the picture has been quietly raising.
 
-[click] Alice claims Bob's lockup, exactly as before. The L-BTC crosses over and is hers.
+Look at where Alice's bitcoin is. It is in a lockup that pays out to *Bob* — the canvas has said so
+since we drew it. So the key in her hand does not open it. She cannot claim her own side, and Bob is
+under no obligation to do anything: he can stop, his node can die, he can change his mind. Without
+something more, her money sits in a contract nobody will ever open.
 
-[click] And then she just turns round and takes her own back too. She has the key, after all — so
-why would anything stop her using it twice?
+[click] So every lockup carries a deadline as well as the hash. That is the second half of the name:
+hash lock, time lock. And note the wording — each lockup has *its own*.
 
-[click] Alice has both coins. Bob has nothing.
+[click] Now run the unhappy path. Nobody claims. The key is never used, so it is never published,
+and both deadlines simply run out.
 
-Now — hold that picture, because it is wrong, and the next slide is about exactly why.
+[click] Past her deadline, Alice takes her own bitcoin back. Not a claim — a refund, the second way
+out of the same lockup. Note the key goes with it, unused: the refund branch does not want the
+preimage, it wants her signature and a block height that has passed.
 
-Do not explain it here. Let them look at it for a second and let it seem reasonable. She has the
-key; why would anything stop her using it twice? That is the intuition worth taking seriously
-before taking it apart.
--->
+[click] And Bob does the same on Liquid.
 
----
-clicks: 4
----
+Both of them end up where they started. That is the guarantee the time lock buys, and it is worth
+stating exactly: not that the swap succeeds, but that failure is survivable. Worst case you lose
+some time and a fee, never the money.
 
-# Every claim needs the other side's key
-
-<div v-click="1" class="mt-5 flex items-center justify-center gap-3">
-  <span class="text-sm text-muted">Alice holds</span>
-  <span class="chip-gold"><span class="i-ph-key-fill" /> the preimage</span>
-  <span class="chip-gold"><span class="i-ph-key-fill" /> her own key</span>
-  <span class="text-sm text-muted">— and nothing of Bob's</span>
-</div>
-
-<div class="mt-6 grid grid-cols-2 gap-7">
-
-  <!-- her own lockup: the one she cannot touch -->
-  <div class="pane-orange px-6 py-5 transition-all duration-500"
-       :class="[$clicks >= 3 ? 'shake-once !border-red/60' : '', $clicks >= 3 ? 'opacity-100' : 'opacity-90']">
-    <div class="flex items-center gap-2.5">
-      <ChainIcon chain="bitcoin" :size="22" />
-      <span class="text-white font-semibold">Alice's lockup</span>
-    </div>
-    <div class="eyebrow mt-3.5">to claim it you need</div>
-    <div class="mt-2.5 space-y-2">
-      <div class="flex items-center gap-2.5 text-sm">
-        <div class="i-ph-key-fill shrink-0 text-gold" />
-        <span class="text-body">the preimage</span>
-        <div v-click="3" class="i-ph-check-circle-fill ml-auto text-green" />
-      </div>
-      <div class="flex items-center gap-2.5 text-sm">
-        <div class="i-ph-key-fill shrink-0 text-purple" />
-        <span class="text-body">Bob's key</span>
-        <div v-click="3" class="i-ph-x-circle-fill ml-auto text-red" />
-      </div>
-    </div>
-    <div v-click="3" class="mt-4 text-center text-sm text-red font-semibold">Alice cannot claim this</div>
-  </div>
-
-  <!-- Bob's lockup: the one she can -->
-  <div class="pane-teal px-6 py-5">
-    <div class="flex items-center gap-2.5">
-      <ChainIcon chain="liquid" :size="22" />
-      <span class="text-white font-semibold">Bob's lockup</span>
-    </div>
-    <div class="eyebrow mt-3.5">to claim it you need</div>
-    <div class="mt-2.5 space-y-2">
-      <div class="flex items-center gap-2.5 text-sm">
-        <div class="i-ph-key-fill shrink-0 text-gold" />
-        <span class="text-body">the preimage</span>
-        <div v-click="2" class="i-ph-check-circle-fill ml-auto text-green" />
-      </div>
-      <div class="flex items-center gap-2.5 text-sm">
-        <div class="i-ph-key-fill shrink-0 text-gold" />
-        <span class="text-body">Alice's key</span>
-        <div v-click="2" class="i-ph-check-circle-fill ml-auto text-green" />
-      </div>
-    </div>
-    <div v-click="2" class="mt-4 text-center text-sm text-green font-semibold">Alice can claim this</div>
-  </div>
-
-</div>
-
-<div v-click="4" class="mt-6 text-center text-xl text-white">
-  Each lockup pays out to <span class="text-gold">the other side</span>, and only they can sign for it
-</div>
-
-<!--
-So here is why the previous slide cannot happen, and it is worth being precise because the reason is
-the thing people miss.
-
-Every claim path in an HTLC needs two things: the preimage, *and* a signature from whoever that
-lockup pays out to. Not just the preimage. We will see it written out in the script shortly — the
-claim leaf ends in a CHECKSIG.
-
-[click] Alice has two things. She has the preimage, because she picked it. And she has her own key.
-That is all. She has nothing of Bob's, and she never did.
-
-[click] So Bob's lockup, on Liquid, she can take. It pays out to her, so it wants her signature, and
-she has it. That is the claim we watched happen.
-
-[click] But her own lockup pays out to *Bob*. Claiming it needs Bob's key, and Alice cannot produce
-Bob's signature any more than she could forge his handwriting. This path is simply shut to her. She
-can hold the preimage all day and it does not help.
-
-[click] Which is the rule underneath both: each lockup pays out to the other side, and only that
-side can sign for it. That is what stops the greedy version.
-
-And now the honest problem appears — because if Alice cannot claim her own lockup, and Bob has not
-claimed it either, then her money is sitting in a contract that nobody can currently open.
--->
-
----
-layout: center
-class: text-center
----
-
-<div class="mb-5 flex justify-center"><div class="i-ph-question-mark-bold text-6xl text-cyan" /></div>
-
-# So how could Alice get her money back, if she needed to?
-
-<div class="mt-4 text-xl text-muted">
-  Her own lockup pays out to Bob — and Bob may never come.
-</div>
-
-<!--
-Which leaves the question this half of the talk has been building to without saying so.
-
-Alice has funded a lockup. She cannot claim it — it pays out to Bob. And suppose Bob never funds his
-side at all, or funds it and then vanishes, or his node dies, or he simply changes his mind. Nothing
-in what we have built so far obliges him to do anything.
-
-So her money sits in an output that she cannot open and he has no reason to.
-
-That is not a theoretical worry, and it is not about anybody being dishonest. Half of all swaps that
-fail, fail because one side went away. If the contract has no answer to this, then "non-custodial"
-just means "your money is stuck instead of stolen", which is not much of an improvement.
--->
-
----
-layout: center
-class: text-center
----
-
-<div class="mb-5 flex justify-center"><div class="i-ph-clock-countdown-duotone text-6xl text-gold" /></div>
-
-# Enter the time lock
-
-<div class="mt-4 text-xl text-muted">
-  Every HTLC has a timelock. This ensures each party has enough time to get their funds.
-</div>
-
-<!--
-Every lockup we have drawn already has one, and it has to: without a deadline, a swap that stalls
-leaves both sides locked forever, with no way for anyone to get their own money back. So the refund
-path is not optional.
-
-That is the T in HTLC. And you have just watched why it is not enough on its own to write "and
-there is a deadline" on both sides and call it done.
-
-The two deadlines are the last free variable in the design, and getting their order wrong is
-exactly the failure on the previous slide.
--->
-
----
-clicks: 4
----
-
-<HtlcTitle active="time" />
-
-<DeadlineTimeline class="mt-3" lockups :clicks="$clicks" />
-
-<!--
-Back to the two lockups, and this time look at the small bar inside each one. That is its timelock —
-the deadline the last slide just introduced. Both have one, and right now both are set to the same
-length: symmetric, fair, and what anybody would reach for first.
-
-[click] Blow those two bars up onto a single shared clock, because the whole question is how they
-relate to each other, and you cannot see that inside two separate boxes.
-
-Each bar is the window in which that lockup can still be claimed. Past the expiration is the hatched
-part: that is not dead time, it is when the owner can take their own funds back. Alice claims first —
-she is the only one with the key — so Bob can only ever act after her.
-
-[click] And Alice is not obliged to be prompt. Assume she claims at the last possible moment before
-the deadlines. The L-BTC is hers.
-
-[click] Here is what that leaves Bob. The instant she claims is the instant his window expires too.
-Everything between those two moments is all the time he will ever have, and it is very nearly
-nothing — nowhere near enough to get a transaction confirmed.
-
-[click] And Alice does not need to do anything clever with the time she has. Her own deadline passes
-and she refunds immediately, right on the mark. Her bitcoin comes back.
-
-Bob is now holding nothing at all: he never got the L-BTC out, and the bitcoin he was owed has gone
-back to Alice. And notice she broke no rule. She was patient and she was quick, in that order.
-
-That is the picture from a few slides ago, and now you can see exactly which knob produced it. Not
-dishonesty — two numbers that happened to be equal.
--->
-
----
-layout: center
-class: text-center
----
-
-<div class="mb-5 flex justify-center"><div class="i-ph-scales-duotone text-6xl text-gold" /></div>
-
-# How to solve this?
-
-<div class="mt-4 text-xl text-muted">
-  Asymmetric time locks do the trick.
-</div>
-
-<!--
-The fix is not a new mechanism. Everything is already in place — two lockups, one hash, two
-deadlines. The only thing wrong is that the deadlines are the same.
-
-So make them different. And the direction matters: it is not enough that they differ, it has to be
-the *right* one that is longer.
-
-Ask the room which one, if there is time. The answer falls out of who has to act second.
--->
-
----
-clicks: 4
----
-
-<HtlcTitle active="time" />
-
-<DeadlineTimeline class="mt-3" lockups asymmetric :clicks="$clicks" />
-
-<!--
-Exactly where we started. Same two lockups, same two deadlines, both still the same length. Nothing
-has been fixed yet.
-
-[click] So fix the one thing. Stretch Alice's deadline out past Bob's — and watch that it happens in
-both places at once, in the small bar inside her lockup and in the big one below. It is one number,
-and it is the only thing on this slide that differs from the last one.
-
-[click] Everything else runs exactly as before. She still waits, she still claims at the last
-possible moment, the key opens Bob's lockup, and the L-BTC is hers.
-
-[click] But now look at the gap between that moment and her own expiration. That gap is Bob's
-window, and this time it is real.
-
-[click] So he uses it. The same key, off the chain, opens her lockup — and the bitcoin is his.
-
-Note what Alice cannot do here. She cannot refund early to squeeze him, because her deadline is the
-one that comes last, by construction. Being patient no longer buys her anything.
-
-Which makes the ordering a safety property rather than a tuning parameter. Whoever has to act
-*second* must still have a window when their turn comes, so the party who moves first takes the
-longer deadline. If you take one thing from this half of the talk, take this one: it is the
-condition that is easiest to state and easiest to get wrong.
+If anyone asks whether the two deadlines are the same length: no, and deliberately not. Whoever has
+to act *second* must still have a window left when their turn comes, so the party who moves first
+takes the longer one — on a Boltz chain swap that is you. The figures are in the handout.
 -->
 
 ---
@@ -814,11 +580,12 @@ hash lock from part one, on screen as one thing appearing twice.
 
 The keys are not. Every name has swapped. Bob's lockup pays out to Alice, so it asks for her
 signature to claim and his to refund. Each side is asking for the *other* party's key — which is
-exactly why Alice cannot claim both, the thing we animated a few slides ago, now sitting in one line
-of script.
+why neither of them can take both. The preimage on its own claims nothing; there is a CHECKSIG at
+the end of every branch, and Alice cannot produce Bob's signature.
 
-The block heights are not the same either. That is the asymmetry from the timeline, living in one
-line.
+The block heights are not the same either. Each lockup carries its own deadline, and the two are
+deliberately different lengths — the party who has to act second needs a window left when their
+turn comes. One line of script, and it is the whole ordering rule.
 
 [click] And here is the thing worth complaining about. There is one script per lockup, so both
 branches are published every time it is spent. Refund quietly six months later, and the chain still
@@ -1411,9 +1178,10 @@ Before the mechanism, the question it answers — this used to be a slide of its
 to ask out loud. You have just been handed an address and told to send real money to it. What are
 you trusting Boltz to have got right? Three things, and none of them require it to be evil; a bug
 would do just as well. That the hash lock commits to *your* preimage hash, not one only they can
-open. That your refund window outlasts theirs, or you are back in the attack we drew in part one.
-And that the tree carries those two leaves and no third one — some extra script letting one side
-out early without the preimage and without waiting.
+open. That your refund window outlasts theirs — if the two deadlines are equal, or the wrong way
+round, the side that has to move second can be squeezed out of its turn. And that the tree carries
+those two leaves and no third one — some extra script letting one side out early without the
+preimage and without waiting.
 
 Then the punchline, and it is worth pausing on: look back at that address and ask which of the three
 you could have spotted. None. Not one is visible in the string, and squinting at the first and last
@@ -1448,48 +1216,6 @@ The check we are about to do is entirely about the locking script — before a s
 On Taproot it is one step less direct: the address encodes an output key that commits to the script
 tree, rather than spelling the branches out. But the property is the same, which is why the same
 check works.
--->
-
----
-clicks: 3
----
-
-# An address encodes the locking script
-
-<TaprootAddress class="mt-1" :clicks="$clicks" />
-
-<!--
-We have just said an address *is* the locking script, encoded. So here is how that one for your
-lockup gets built. Two ingredients, one number, and then the payoff.
-
-First the script tree — the two leaves from a few slides ago. Hash each one, hash the pair, and you
-have the merkle root: a single fingerprint standing for every scripted way this output can ever be
-unlocked. Note there is no intermediate branch, because with exactly two leaves one pairing *is* the
-root.
-
-[click] Second, the internal key: your key and Boltz's, aggregated with MuSig2.
-
-[click] Now combine them. The root gets hashed together with the key, and the result is added to the
-key — say that carefully if anyone asks, because you sometimes hear "multiply". The hash *is*
-multiplied, but by the generator point, and the point that comes out is *added*. Addition is the
-whole trick: whoever could sign for the original key can still sign for the tweaked one, by adding
-the same number to their private key.
-
-And that tweaked key *is* the locking script. Look at what actually sits in the output: push a one,
-push thirty-two bytes. That is the whole of it. The hash lock is not in there. The time lock is not
-in there. Neither key is in there. The address is just that number, encoded.
-
-[click] Which sets up the thing worth taking away from this slide. Both ways out are already inside
-that single key. Sign for it, and you are done — that is the key path, and it looks like any
-ordinary payment. Or reveal one leaf together with a path proving it helped build the root, and the
-chain can check that against the key you funded. That is the script path.
-
-So Boltz cannot pretend the refund leaf was never there. The address you sent money to was computed
-from it.
-
-And because it is computed rather than assigned, you can compute it yourself. Which is exactly what
-the next slide does — the app runs this same derivation locally, and refuses to show you an address
-unless its answer matches theirs.
 -->
 
 ---
@@ -1569,9 +1295,11 @@ come from.
 [click] It starts from what it already holds. The preimage hash is its own preimage, hashed here.
 The key is derived from the rescue key. Neither came from the server.
 
-[click] Then it rebuilds the whole thing itself — both leaves, then the tweaked key they produce,
-then the script that key sits in. Boltz's key may claim with the preimage; ours may refund after the
-timeout. It knows which way round that goes; it does not ask.
+[click] Then it rebuilds the whole thing itself — both leaves, then the single key those leaves and
+the MuSig2 aggregate get tweaked into, then the script that key sits in. That tweaked key *is* the
+locking script on Taproot: push a one, push thirty-two bytes, and both ways out are committed inside
+it. Boltz's key may claim with the preimage; ours may refund after the timeout. The client knows
+which way round that goes; it does not ask.
 
 Read the prefixes and the slide reads itself. Everything called `our` was computed in this browser.
 Everything called `boltz` arrived over the wire. The whole check is: do they match.
@@ -1690,60 +1418,12 @@ to.
 Why check theirs at all, when you are not funding it? Because a correct lockup on your side is only
 half the trade. If their side commits to a different preimage hash, or names a key that is not
 yours, you would fund a perfectly good lockup and still have no way to claim what you are owed.
--->
 
----
-clicks: 5
----
-
-# Where that leaves us
-
-<div class="mt-8 space-y-3">
-
-<div v-click="1" class="pane flex items-center gap-4 px-6 py-3">
-  <div class="i-ph-sliders-horizontal-duotone shrink-0 text-xl text-cyan" />
-  <div class="text-body">You picked the pair and the amount</div>
-</div>
-
-<div v-click="2" class="pane flex items-center gap-4 px-6 py-3">
-  <div class="i-ph-key-duotone shrink-0 text-xl text-gold" />
-  <div class="text-body">Boltz Web App generated the keys and the preimage, and sent only the <span class="text-white">hash</span></div>
-</div>
-
-<div v-click="3" class="pane flex items-center gap-4 px-6 py-3">
-  <ChainIcon chain="boltz" :size="20" />
-  <div class="text-body">Boltz backend replied with a tree, its key, a deadline and an <span class="text-white">address</span></div>
-</div>
-
-<div v-click="4" class="pane flex items-center gap-4 px-6 py-3">
-  <div class="i-ph-shield-check-duotone shrink-0 text-xl text-green" />
-  <div class="text-body">The Boltz Web App in your browser rebuilt all of it and compared, twice, on both lockups</div>
-</div>
-
-</div>
-
-<div v-click="5" class="mt-8 flex items-center justify-center gap-4">
-  <div class="i-ph-check-circle-fill text-4xl text-green" />
-  <div class="text-2xl text-white">Safe to fund.</div>
-</div>
-
-<!--
-Quick recap, because the next part is where money actually moves.
-
-[click] You picked a pair and an amount. Nothing had left the browser yet.
-
-[click] Your browser generated the keys and the preimage from the rescue phrase, and sent Boltz the
-hash — never the preimage, never a private key.
-
-[click] Boltz replied with the whole proposed contract: the tree, its own public key, a timeout
-height and the address to fund.
-
-[click] And the browser threw none of that away and trusted none of it. It rebuilt the contract from
-what it already held, compared branch for branch, decoded the address back into a script and
-compared that too — for both lockups, not just yours.
-
-[click] Which is the only reason the next step is reasonable. Everything up to here has been
-preparation for one irreversible action, and that action is now safe to take.
+So take stock, because the next step is where money actually moves. You picked a pair and an amount.
+Your browser made the keys and the preimage and sent Boltz only the hash. Boltz sent back a proposed
+contract — a tree, its own key, a deadline, an address — and your browser threw none of it away and
+trusted none of it: it rebuilt the whole thing from what it already held and compared, on both
+lockups. That is the only reason what comes next is reasonable. It is safe to fund.
 -->
 
 ---

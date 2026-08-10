@@ -244,6 +244,15 @@ const assetTop = (at: Spot) => ASSET_TOP[inLockup(at) ? 'lockup' : 'person']
 .key-in-enter-from { opacity: 0; transform: translate(-50%, .5rem) scale(.6); }
 
 /*
+ * And fades out again, for the one slide that takes the key away — the refund
+ * path never uses it, and leaving it beside Alice would collide with the coin
+ * coming back to her. Without this the removal is instant, which reads as a
+ * glitch rather than as the key going unused.
+ */
+.key-in-leave-active { transition: opacity .3s ease, transform .3s ease; }
+.key-in-leave-to { opacity: 0; transform: translate(-50%, .35rem) scale(.8); }
+
+/*
  * A slide that mounts with the key already placed never runs the transition
  * above — and `appear` is no help either, because Slidev keeps every slide in
  * the DOM from page load and merely hides the inactive ones. It hides them with
